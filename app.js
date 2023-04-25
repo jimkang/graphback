@@ -50,6 +50,7 @@ async function followRoute({
   maxDuration = 4.0,
   minFeedbackGain = 0.0,
   maxFeedbackGain = 1.0,
+  feedbackDelayFactor = 0.2,
   enableFeedback = true,
   sampleIndex = 0,
 }) {
@@ -67,6 +68,7 @@ async function followRoute({
   maxDuration = +maxDuration;
   minFeedbackGain = +minFeedbackGain;
   maxFeedbackGain = +maxFeedbackGain;
+  feedbackDelayFactor = +feedbackDelayFactor;
 
   var renderDensityCanvas = RenderTimeControlGraph({
     canvasId: 'density-canvas',
@@ -259,6 +261,7 @@ async function followRoute({
           grainOffsets: offsetUndoer.getCurrentValue(),
           durations: durationUndoer.getCurrentValue(),
           feedbackGains: feedbackUndoer.getCurrentValue(),
+          feedbackDelayFactor,
           tickIndex: ticks,
           totalTicks,
         },

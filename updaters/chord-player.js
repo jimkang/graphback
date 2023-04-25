@@ -12,6 +12,7 @@ export function ChordPlayer({ ctx, sampleBuffer, enableFeedback }) {
     grainOffsets,
     durations,
     feedbackGains,
+    feedbackDelayFactor,
     currentTickLengthSeconds,
     tickIndex,
     totalTicks,
@@ -63,7 +64,7 @@ export function ChordPlayer({ ctx, sampleBuffer, enableFeedback }) {
 
       if (enableFeedback) {
         let feedback = new Feedback(ctx, {
-          delay: currentTickLengthSeconds / 20,
+          delay: currentTickLengthSeconds * feedbackDelayFactor,
           gain: interpolateValueWithTick({
             tickIndex,
             totalTicks,
