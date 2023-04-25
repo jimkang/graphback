@@ -33,7 +33,7 @@ var chordPlayer;
   routeState = RouteState({
     followRoute,
     windowObject: window,
-    propsToCoerceToBool: ['enableFeedback']
+    propsToCoerceToBool: ['enableFeedback'],
   });
   routeState.routeFromHash();
 })();
@@ -106,7 +106,6 @@ async function followRoute({
     storageKey: 'feedbackOverTimeArray',
   });
 
-
   function callRenderDensityCanvas(newValue, undoer) {
     renderDensityCanvas({
       valueOverTimeArray: newValue,
@@ -176,7 +175,7 @@ async function followRoute({
       'crackle.wav',
       'rustle.wav',
       'log-crunch.wav',
-      'sink-drips.wav'
+      'sink-drips.wav',
     ],
     localMode: true,
     onComplete,
@@ -215,7 +214,6 @@ async function followRoute({
     onChange: feedbackUndoer.onChange,
   });
 
-
   (function renderGraphRangeLabels() {
     select('.min-length').text(minGrainLength);
     select('.max-length').text(maxGrainLength);
@@ -230,7 +228,11 @@ async function followRoute({
   // TODO: Test non-locally.
   function onComplete({ buffers }) {
     console.log(buffers);
-    chordPlayer = ChordPlayer({ ctx, sampleBuffer: buffers[sampleIndex], enableFeedback });
+    chordPlayer = ChordPlayer({
+      ctx,
+      sampleBuffer: buffers[sampleIndex],
+      enableFeedback,
+    });
     wireControls({
       onStart,
       onUndoDensity: densityUndoer.onUndo,

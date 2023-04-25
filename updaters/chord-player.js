@@ -46,7 +46,10 @@ export function ChordPlayer({ ctx, sampleBuffer, enableFeedback }) {
       sampler.connect({ synthNode: envelope });
 
       if (enableFeedback) {
-        let feedback = new Feedback(ctx, { delay: currentTickLengthSeconds / 2, gain: feedbackGains[i] });
+        let feedback = new Feedback(ctx, {
+          delay: currentTickLengthSeconds / 20,
+          gain: feedbackGains[i],
+        });
         envelope.connect({ synthNode: feedback });
         // HACK: There should be a general way to connect two outputs to a dest.
         feedback.connect({ audioNode: ctx.destination });
