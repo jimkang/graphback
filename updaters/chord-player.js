@@ -1,16 +1,17 @@
-import { Sampler, Envelope } from '../synths/synth-node';
+import { Sampler, Envelope, Feedback } from '../synths/synth-node';
 import { timeNeededForEnvelopeDecay } from '../consts';
 
-export function ChordPlayer({ ctx, sampleBuffer }) {
+export function ChordPlayer({ ctx, sampleBuffer, enableFeedback }) {
   return { play };
 
   function play({
     rates,
     delays,
-    currentTickLengthSeconds,
     grainLengths,
     grainOffsets,
     durations,
+    feedbackGains,
+    currentTickLengthSeconds,
     tickIndex,
   }) {
     const loopStart = grainOffsets[tickIndex];
@@ -43,6 +44,13 @@ export function ChordPlayer({ ctx, sampleBuffer }) {
       const maxGain = 0.8 / Math.pow(rates.length, 3);
       var envelope = new Envelope(ctx, { envelopeMaxGain: maxGain });
       sampler.connect({ synthNode: envelope });
+
+      if (enableFeedback) {
+        let feedback = new Feedback(ctx, { delay: currentTickLengthSeconds / 2, gain: feedbackGains[i] });
+        envelope.connect({ synthNode: feedback });
+        // HACK: There should be a general way to connect two outputs to a dest.
+        feedback.connect({ audioNode: ctx.destination });
+      }
       return [sampler, envelope];
     }
   }

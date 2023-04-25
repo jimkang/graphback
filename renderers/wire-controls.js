@@ -12,6 +12,7 @@ function wireControls({
   onUndoLength,
   onUndoOffset,
   onUndoDuration,
+  onUndoFeedback,
   onPieceLengthChange,
   onTickLengthChange,
   totalTicks,
@@ -26,6 +27,7 @@ function wireControls({
   on('#undo-length-button', 'click', onUndoLength);
   on('#undo-offset-button', 'click', onUndoOffset);
   on('#undo-duration-button', 'click', onUndoDuration);
+  on('#undo-feedback-button', 'click', onUndoFeedback);
   on('#piece-length-field', 'change', onPieceLengthFieldChange);
   on('#tick-length-field', 'change', onTickLengthFieldChange);
 

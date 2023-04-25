@@ -14,8 +14,8 @@ export class SynthNode {
   node() {
     return this.node;
   }
-  syncToParams() {}
-  cancelScheduledRamps() {}
+  syncToParams() { }
+  cancelScheduledRamps() { }
   connect({ synthNode, audioNode }) {
     if (audioNode) {
       this.node.connect(audioNode);
@@ -56,7 +56,7 @@ export class VibratoAmp extends SynthNode {
     var connectTarget = connectTargetNode[this.params.destProp || 'detune'];
     this.node.connect(connectTarget);
   }
-  play() {}
+  play() { }
 }
 
 export class Gain extends SynthNode {
@@ -71,7 +71,7 @@ export class Gain extends SynthNode {
   cancelScheduledRamps() {
     this.node.gain.cancelScheduledValues(this.ctx.currentTime);
   }
-  play() {}
+  play() { }
 }
 
 export class Envelope extends SynthNode {
@@ -230,7 +230,7 @@ export class Panner extends SynthNode {
       isNaN(this.params.rampSeconds) ? 0.1 : this.params.rampSeconds
     );
   }
-  play() {}
+  play() { }
 }
 
 // Warning: cancelScheduledValues doesn't cover this.
@@ -248,4 +248,26 @@ function homemadeLinearRamp(param, targetVal, ctx, durationSeconds) {
       window.requestAnimationFrame(updateParam);
     }
   }
+}
+
+export class Feedback extends SynthNode {
+  constructor(ctx, params) {
+    super(ctx, params);
+
+    this.delay = this.params.delay;
+    this.gain = this.params.gain;
+
+    this.node = this.ctx.createDelay();
+    this.node.delayTime.value = this.delay;
+    this.gainNode = this.ctx.createGain();
+    this.gainNode.gain.value = this.gain;
+
+    this.node.connect(this.gainNode);
+    this.gainNode.connect(this.node);
+  }
+  connect({ synthNode, audioNode }) {
+    var connectTargetNode = audioNode || synthNode.node;
+    this.gainNode.connect(connectTargetNode);
+  }
+  play() { }
 }

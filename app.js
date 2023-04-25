@@ -47,6 +47,9 @@ async function followRoute({
   maxGrainOffset = 0.5,
   minDuration = 0.9,
   maxDuration = 4.0,
+  minFeedbackGain = 0.0,
+  maxFeedbackGain = 1.0,
+  enableFeedback = true,
   sampleIndex = 0,
 }) {
   if (!seed) {
@@ -93,6 +96,15 @@ async function followRoute({
     onUpdateValue: callRenderDurationCanvas,
     storageKey: 'durationOverTimeArray',
   });
+  var renderFeedbackCanvas = RenderTimeControlGraph({
+    canvasId: 'feedback-canvas',
+    lineColor: 'hsl(300, 60%, 60%)',
+  });
+  var feedbackUndoer = Undoer({
+    onUpdateValue: callRenderFeedbackCanvas,
+    storageKey: 'feedbackOverTimeArray',
+  });
+
 
   function callRenderDensityCanvas(newValue, undoer) {
     renderDensityCanvas({
@@ -126,6 +138,15 @@ async function followRoute({
       valueOverTimeArray: newValue,
       valueMin: minDuration,
       valueMax: maxDuration,
+      onChange: undoer.onChange,
+    });
+  }
+
+  function callRenderFeedbackCanvas(newValue, undoer) {
+    renderFeedbackCanvas({
+      valueOverTimeArray: newValue,
+      valueMin: minFeedbackGain,
+      valueMax: maxFeedbackGain,
       onChange: undoer.onChange,
     });
   }
@@ -186,6 +207,13 @@ async function followRoute({
     valueMax: maxDuration,
     onChange: durationUndoer.onChange,
   });
+  renderFeedbackCanvas({
+    valueOverTimeArray: feedbackUndoer.getCurrentValue(),
+    valueMin: minFeedbackGain,
+    valueMax: maxFeedbackGain,
+    onChange: feedbackUndoer.onChange,
+  });
+
 
   (function renderGraphRangeLabels() {
     select('.min-length').text(minGrainLength);
@@ -194,18 +222,21 @@ async function followRoute({
     select('.max-offset').text(maxGrainOffset);
     select('.min-duration').text(minDuration);
     select('.max-duration').text(maxDuration);
+    select('.min-feedbcak').text(minFeedbackGain);
+    select('.max-feedback').text(maxFeedbackGain);
   })();
 
   // TODO: Test non-locally.
   function onComplete({ buffers }) {
     console.log(buffers);
-    chordPlayer = ChordPlayer({ ctx, sampleBuffer: buffers[sampleIndex] });
+    chordPlayer = ChordPlayer({ ctx, sampleBuffer: buffers[sampleIndex], enableFeedback });
     wireControls({
       onStart,
       onUndoDensity: densityUndoer.onUndo,
       onUndoLength: lengthUndoer.onUndo,
       onUndoOffset: offsetUndoer.onUndo,
       onUndoDuration: durationUndoer.onUndo,
+      onUndoFeedback: feedbackUndoer.onUndo,
       onPieceLengthChange,
       onTickLengthChange,
       totalTicks,
@@ -222,6 +253,7 @@ async function followRoute({
           grainLengths: lengthUndoer.getCurrentValue(),
           grainOffsets: offsetUndoer.getCurrentValue(),
           durations: durationUndoer.getCurrentValue(),
+          feedbackGains: feedbackUndoer.getCurrentValue(),
           tickIndex: ticks,
         },
         getChord({
