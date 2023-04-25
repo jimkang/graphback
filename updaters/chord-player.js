@@ -1,5 +1,6 @@
 import { Sampler, Envelope, Feedback } from '../synths/synth-node';
 import { timeNeededForEnvelopeDecay } from '../consts';
+import { interpolateValueWithTick } from '../tasks/interpolate-with-tick';
 
 export function ChordPlayer({ ctx, sampleBuffer, enableFeedback }) {
   return { play };
@@ -13,8 +14,13 @@ export function ChordPlayer({ ctx, sampleBuffer, enableFeedback }) {
     feedbackGains,
     currentTickLengthSeconds,
     tickIndex,
+    totalTicks,
   }) {
-    const loopStart = grainOffsets[tickIndex];
+    const loopStart = interpolateValueWithTick({
+      tickIndex,
+      totalTicks,
+      array: grainOffsets,
+    });
     var samplerChains = rates.map(rateToSamplerChain);
     samplerChains.forEach(
       connectLastToDest
@@ -28,7 +34,11 @@ export function ChordPlayer({ ctx, sampleBuffer, enableFeedback }) {
       sampler.play({
         startTime,
         loopStart,
-        duration: durations[tickIndex], //currentTickLengthSeconds,
+        duration: interpolateValueWithTick({
+          tickIndex,
+          totalTicks,
+          array: durations,
+        }),
       });
     }
 
@@ -38,7 +48,13 @@ export function ChordPlayer({ ctx, sampleBuffer, enableFeedback }) {
         playbackRate: rate,
         loop: true,
         loopStart,
-        loopEnd: loopStart + grainLengths[tickIndex],
+        loopEnd:
+          loopStart +
+          interpolateValueWithTick({
+            tickIndex,
+            totalTicks,
+            array: grainLengths,
+          }),
         timeNeededForEnvelopeDecay,
       });
       const maxGain = 0.8 / Math.pow(rates.length, 3);
@@ -48,7 +64,11 @@ export function ChordPlayer({ ctx, sampleBuffer, enableFeedback }) {
       if (enableFeedback) {
         let feedback = new Feedback(ctx, {
           delay: currentTickLengthSeconds / 20,
-          gain: feedbackGains[i],
+          gain: interpolateValueWithTick({
+            tickIndex,
+            totalTicks,
+            array: feedbackGains,
+          }),
         });
         envelope.connect({ synthNode: feedback });
         // HACK: There should be a general way to connect two outputs to a dest.
