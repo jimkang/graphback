@@ -33,6 +33,7 @@ var chordPlayer;
   routeState = RouteState({
     followRoute,
     windowObject: window,
+    propsToCoerceToBool: ['enableFeedback']
   });
   routeState.routeFromHash();
 })();
@@ -48,7 +49,7 @@ async function followRoute({
   minDuration = 0.9,
   maxDuration = 4.0,
   minFeedbackGain = 0.0,
-  maxFeedbackGain = 1.0,
+  maxFeedbackGain = 1.5,
   enableFeedback = true,
   sampleIndex = 0,
 }) {
