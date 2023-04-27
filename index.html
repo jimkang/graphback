@@ -43,10 +43,16 @@
         <canvas id="feedback-canvas" width="900" height="600"></canvas>
         <button id="undo-feedback-button">Undo last feedback stroke</button>
       </div>
+
+      <div class="graph">
+        <h2>Tick length (<span class="min-ticklength"></span> to <span class="max-ticklength"></span>)</h2>
+        <canvas id="ticklength-canvas" width="900" height="600"></canvas>
+        <button id="undo-ticklength-button">Undo last tick length stroke</button>
+      </div>
     </div>
 
     <label for="piece-length-field">Length of piece in ticks:</label><input id="piece-length-field" type="number">
-    <label for="tick-length-field">Tick length in seconds:</label><input id="tick-length-field" type="number" step="0.1">
+    <!-- <label for="tick-length-field">Tick length in seconds:</label><input id="tick-length-field" type="number" step="0.1"> -->
     <button id="start-button" disabled="true">Start</button>
 
     <div id="version-info"></div>

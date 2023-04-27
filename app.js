@@ -17,6 +17,7 @@ import { tonalityDiamondPitches } from './tonality-diamond';
 import { defaultTotalTicks, defaultSecondsPerTick } from './consts';
 import { Undoer } from './updaters/undoer';
 import { select } from 'd3-selection';
+import { interpolateValueWithTick } from './tasks/interpolate-with-tick';
 
 var randomId = RandomId();
 var routeState;
@@ -50,6 +51,8 @@ async function followRoute({
   maxDuration = 4.0,
   minFeedbackGain = 0.0,
   maxFeedbackGain = 1.0,
+  minTickLength = 0.1,
+  maxTickLength = 2.0,
   feedbackDelayFactor = 0.2,
   enableFeedback = true,
   sampleIndex = 0,
@@ -69,6 +72,8 @@ async function followRoute({
   minFeedbackGain = +minFeedbackGain;
   maxFeedbackGain = +maxFeedbackGain;
   feedbackDelayFactor = +feedbackDelayFactor;
+  minTickLength = +minTickLength;
+  maxTickLength = +maxTickLength;
 
   var renderDensityCanvas = RenderTimeControlGraph({
     canvasId: 'density-canvas',
@@ -109,6 +114,15 @@ async function followRoute({
     onUpdateValue: callRenderFeedbackCanvas,
     storageKey: 'feedbackOverTimeArray',
   });
+  var renderTickLengthCanvas = RenderTimeControlGraph({
+    canvasId: 'ticklength-canvas',
+    lineColor: 'hsl(300, 60%, 60%)',
+  });
+  var tickLengthUndoer = Undoer({
+    onUpdateValue: callRenderTickLengthCanvas,
+    storageKey: 'tickLengthOverTimeArray',
+  });
+
 
   function callRenderDensityCanvas(newValue, undoer) {
     renderDensityCanvas({
@@ -151,6 +165,14 @@ async function followRoute({
       valueOverTimeArray: newValue,
       valueMin: minFeedbackGain,
       valueMax: maxFeedbackGain,
+      onChange: undoer.onChange,
+    });
+  }
+  function callRenderTickLengthCanvas(newValue, undoer) {
+    renderTickLengthCanvas({
+      valueOverTimeArray: newValue,
+      valueMin: minTickLength,
+      valueMax: maxTickLength,
       onChange: undoer.onChange,
     });
   }
@@ -217,6 +239,13 @@ async function followRoute({
     valueMax: maxFeedbackGain,
     onChange: feedbackUndoer.onChange,
   });
+  renderTickLengthCanvas({
+    valueOverTimeArray: tickLengthUndoer.getCurrentValue(),
+    valueMin: minTickLength,
+    valueMax: maxTickLength,
+    onChange: tickLengthUndoer.onChange,
+  });
+
 
   (function renderGraphRangeLabels() {
     select('.min-length').text(minGrainLength);
@@ -225,8 +254,10 @@ async function followRoute({
     select('.max-offset').text(maxGrainOffset);
     select('.min-duration').text(minDuration);
     select('.max-duration').text(maxDuration);
-    select('.min-feedbcak').text(minFeedbackGain);
+    select('.min-feedback').text(minFeedbackGain);
     select('.max-feedback').text(maxFeedbackGain);
+    select('.min-ticklength').text(minTickLength);
+    select('.max-ticklength').text(maxTickLength);
   })();
 
   // TODO: Test non-locally.
@@ -244,6 +275,7 @@ async function followRoute({
       onUndoOffset: offsetUndoer.onUndo,
       onUndoDuration: durationUndoer.onUndo,
       onUndoFeedback: feedbackUndoer.onUndo,
+      onUndoTickLength: tickLengthUndoer.onUndo,
       onPieceLengthChange,
       onTickLengthChange,
       totalTicks,
@@ -283,8 +315,8 @@ async function followRoute({
     routeState.addToRoute({ secondsPerTick: length });
   }
 
-  function getTickLength() {
-    return secondsPerTick;
+  function getTickLength(tickIndex) {
+    return interpolateValueWithTick({ array: tickLengthUndoer.getCurrentValue(), tickIndex, totalTicks });
   }
 }
 

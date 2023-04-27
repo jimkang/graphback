@@ -4,7 +4,7 @@ var OLPE = require('one-listener-per-element');
 
 var { on } = OLPE();
 var pieceLengthInput = document.getElementById('piece-length-field');
-var secondsPerTickInput = document.getElementById('tick-length-field');
+// var secondsPerTickInput = document.getElementById('tick-length-field');
 
 function wireControls({
   onStart,
@@ -13,13 +13,14 @@ function wireControls({
   onUndoOffset,
   onUndoDuration,
   onUndoFeedback,
+  onUndoTickLength,
   onPieceLengthChange,
   onTickLengthChange,
   totalTicks,
-  secondsPerTick,
+  // secondsPerTick,
 }) {
   pieceLengthInput.value = totalTicks;
-  secondsPerTickInput.value = secondsPerTick;
+  // secondsPerTickInput.value = secondsPerTick;
 
   select('#start-button').attr('disabled', null);
   on('#start-button', 'click', onStartClick);
@@ -28,8 +29,9 @@ function wireControls({
   on('#undo-offset-button', 'click', onUndoOffset);
   on('#undo-duration-button', 'click', onUndoDuration);
   on('#undo-feedback-button', 'click', onUndoFeedback);
+  on('#undo-ticklength-button', 'click', onUndoTickLength);
   on('#piece-length-field', 'change', onPieceLengthFieldChange);
-  on('#tick-length-field', 'change', onTickLengthFieldChange);
+  // on('#tick-length-field', 'change', onTickLengthFieldChange);
 
   function onStartClick() {
     onStart();
